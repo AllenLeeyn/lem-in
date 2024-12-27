@@ -43,10 +43,10 @@ This `lem-in` project is a digital version of an ant farm. The goals of the prog
 
 ## Task
 
-- read file
-- validate input
-- get number of ants
-- get rooms
+- read file (Jedi)
+- validate input (Jedi)
+- get number of ants (Jedi)
+- get rooms (Jedi)
 - map out rooms and links/tunnels (?)
 
 #### example00
