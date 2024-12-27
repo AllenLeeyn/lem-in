@@ -12,70 +12,66 @@ type AntMovement struct {
 }
 
 func (l *Lemz) SimulateAntMovement() {
-	// Create an array of AntMovement structs to track each ant
 	antMovements := make([]AntMovement, l.antQty)
-
-	// Initialize ants with paths, each ant gets a path in a round-robin fashion, but more intelligently
-	// Ants will be distributed across paths by considering their length (fewer ants in longer paths).
 	antCountPerPath := make([]int, len(l.paths))
 
-	// Distribute ants across the paths intelligently
+	// Distribute ants across paths optimally
 	for i := 0; i < l.antQty; i++ {
-		shortestPathIndex := getShortestPathIndex(antCountPerPath, l.paths) // Get the path with the least number of ants
+		optimalPathIndex := getOptimalPathIndex(antCountPerPath, l.paths)
 		antMovements[i].antID = i + 1
-		antMovements[i].path = l.paths[shortestPathIndex] // Assign ant to the shortest path
-		antMovements[i].position = 1                      // start printing the room after the start room
-		antCountPerPath[shortestPathIndex]++
+		antMovements[i].path = l.paths[optimalPathIndex]
+		antMovements[i].position = 1
+		antCountPerPath[optimalPathIndex]++
 	}
 
-	// Start the simulation and print movements
-	// Track the movement of ants in each step, ensuring no room is occupied twice
+	// Simulate movement
 	for {
 		allAntsFinished := true
 		var movementOutput []string
-		occupiedRooms := make(map[string]bool) // Map to track occupied rooms in each step
+		occupiedRooms := make(map[string]bool) // Track occupied rooms in the current step
 
-		// Check if any ants are still moving, and move them
 		for i := 0; i < len(antMovements); i++ {
 			ant := &antMovements[i]
 			if ant.position < len(ant.path) {
 				allAntsFinished = false
 				room := ant.path[ant.position]
 
-				// Check if the room is occupied by another ant
-				if _, occupied := occupiedRooms[room]; !occupied {
-					// Move the ant to the next room in the path
+				// Allow multiple ants in `l.start` and `l.end`
+				if room == l.start || room == l.end || !occupiedRooms[room] {
+					// Move the ant to the next room
 					movementOutput = append(movementOutput, fmt.Sprintf("%d-%s", ant.antID, room))
-					occupiedRooms[room] = true // Mark this room as occupied
-					ant.position++             // Move to the next room in the path
+					if room != l.start && room != l.end {
+						occupiedRooms[room] = true // Mark room as occupied
+					}
+					ant.position++
 				}
 			}
 		}
 
-		// Print the current movement of all ants in the format "1-a 2-b 3-c ..."
+		// Print the movements for this step
 		if len(movementOutput) > 0 {
 			fmt.Println(strings.Join(movementOutput, " "))
 		}
 
-		// If all ants have finished, stop the simulation
+		// Stop simulation if all ants have finished
 		if allAntsFinished {
 			break
 		}
 	}
+
 }
 
-// Helper function to get the index of the path with the fewest ants
-func getShortestPathIndex(antCountPerPath []int, paths [][]string) int {
-	minAnts := int(^uint(0) >> 1) // Initialize to a large number (max int)
-	minPathIndex := 0
+func getOptimalPathIndex(antCountPerPath []int, paths [][]string) int {
+	minCost := int(^uint(0) >> 1) // Large number (max int)
+	optimalPathIndex := 0
 
-	// Find the path with the least number of ants assigned
 	for i, path := range paths {
-		if len(path) < len(paths[minPathIndex]) && antCountPerPath[i] < minAnts {
-			minAnts = antCountPerPath[i]
-			minPathIndex = i
+		cost := (len(path) - 1) + antCountPerPath[i] // Cost = path length + current congestion
+		if cost < minCost {
+			minCost = cost
+			optimalPathIndex = i
 		}
 	}
 
-	return minPathIndex
+	return optimalPathIndex
 }

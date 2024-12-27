@@ -1,7 +1,7 @@
 package main
 
-// Helper function to perform BFS and find an augmenting path
-func (l *Lemz) Bfs(capacity map[string]map[string]int, flow map[string]map[string]int, parent map[string]string) bool {
+// Breadth-first search (BFS) to find shortest path; and find an augmenting path
+func (l *Lemz) BfsDirected(capacity map[string]map[string]int, flow map[string]map[string]int, parent *map[string]string, usedEndEdges *map[string]bool) bool {
 	visited := make(map[string]bool)
 	queue := []string{l.start}
 	visited[l.start] = true
@@ -11,54 +11,68 @@ func (l *Lemz) Bfs(capacity map[string]map[string]int, flow map[string]map[strin
 		queue = queue[1:]
 
 		for _, neighbor := range l.graph[node] {
-			if !visited[neighbor] && capacity[node][neighbor]-flow[node][neighbor] > 0 { // There's remaining capacity
-				parent[neighbor] = node
+			// Check residual capacity in the forward direction
+			if !visited[neighbor] && capacity[node][neighbor]-flow[node][neighbor] > 0 {
+				// Avoid reusing edges unnecessarily
+				if neighbor == l.end && (*usedEndEdges)[node] {
+					continue
+				}
+				(*parent)[neighbor] = node
+				visited[neighbor] = true
+
 				if neighbor == l.end {
+					(*usedEndEdges)[node] = true
 					return true
 				}
-				visited[neighbor] = true
 				queue = append(queue, neighbor)
 			}
 		}
 	}
+
 	return false
 }
 
-// Edmonds-Karp algorithm to find all paths
+// Edmonds-Karp algorithm to find all paths; all ends must have a path
 func (l *Lemz) EdmondsKarp() {
-	// Initialize flow and capacity maps
+	// Initialize capacity, flow, and usedEndEdges
 	capacity := make(map[string]map[string]int)
 	flow := make(map[string]map[string]int)
+	usedEndEdges := make(map[string]bool)
 
 	for node := range l.graph {
 		capacity[node] = make(map[string]int)
 		flow[node] = make(map[string]int)
 	}
 
-	// Set capacity for each edge
+	// Set capacities for all edges
 	for _, link := range l.links {
+		// Directed graph: set capacity in one direction
 		capacity[link[0]][link[1]] = 1
-		capacity[link[1]][link[0]] = 1 // For undirected graph
+		if _, exists := flow[link[0]]; !exists {
+			flow[link[0]] = make(map[string]int)
+		}
+		if _, exists := flow[link[1]]; !exists {
+			flow[link[1]] = make(map[string]int)
+		}
 	}
 
-	// Find augmenting paths using BFS
+	// Use pointers to parent map and usedEndEdges
 	for {
 		parent := make(map[string]string)
-		if !l.Bfs(capacity, flow, parent) {
-			break // No more augmenting paths
+		if !l.BfsDirected(capacity, flow, &parent, &usedEndEdges) {
+			break
 		}
 
-		// Find the bottleneck capacity (minimum residual capacity along the path)
-		pathFlow := 1 // For unweighted graphs, flow is 1 for each path
+		// Update flow along the found path
 		node := l.end
 		for node != l.start {
 			prevNode := parent[node]
-			flow[prevNode][node] += pathFlow
-			flow[node][prevNode] -= pathFlow
+			flow[prevNode][node]++
+			flow[node][prevNode]-- // Residual capacity
 			node = prevNode
 		}
 
-		// Add the found path to paths
+		// Construct and store the path
 		path := []string{}
 		node = l.end
 		for node != l.start {
@@ -69,56 +83,3 @@ func (l *Lemz) EdmondsKarp() {
 		l.paths = append(l.paths, path)
 	}
 }
-
-/* DOESNT WORK: // list of path single values in order from start to end [but this is undirected flow!!!!]
-func (l *Lemz) GetPathSingleOrder(links [][2]string) [][]string {
-	pathSingleOrder := []string{}
-	editedLinks := l.links
-	from := l.start
-	fmt.Printf("starting l.links: %#v\n", l.links)
-
-	for i := 0; i < l.EndCount(l.links); i++ {
-		fmt.Printf("endcount: %v\n", l.EndCount(l.links))
-		for i := 0; i < len(editedLinks); i++ {
-
-			fmt.Printf("FOR:editedLinks[%v]: %v\n", i, editedLinks[i])
-
-			if editedLinks[i][0] == from {
-				pathSingleOrder = append(pathSingleOrder, editedLinks[i][1])
-				from = editedLinks[i][1]
-				editedLinks = append(editedLinks[:i], editedLinks[i+1:]...)
-				continue
-			} else if l.links[i][1] == from {
-				pathSingleOrder = append(pathSingleOrder, l.links[i][0])
-				from = l.links[i][0]
-				l.links = append(l.links[:i], l.links[i+1:]...)
-				fmt.Printf("pathSingleOrder: %#v | from: %#v\n", pathSingleOrder, from)
-				continue
-			}
-
-			if from == l.end {
-				fmt.Printf("from == l.end\n")
-				editedLinks = l.links
-				from = l.start
-				l.pathsSingleOrder = append(l.pathsSingleOrder, pathSingleOrder)
-				break
-			}
-
-			fmt.Printf("FOR: pathSingleOrder: %#v | from: %#v\n", pathSingleOrder, from)
-
-		}
-	}
-	fmt.Printf("PathSSSingleOrder: %#v || len: %#v\n", l.pathsSingleOrder, len(l.pathsSingleOrder))
-	return l.pathsSingleOrder
-}
-
-func (l *Lemz) EndCount(links [][2]string) int {
-	endCount := 0
-	for _, link := range l.links {
-		if link[0] == l.end || link[1] == l.end {
-			endCount++
-		}
-	}
-	return endCount
-}
-*/
