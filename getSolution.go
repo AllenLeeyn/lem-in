@@ -6,10 +6,11 @@ func (m *maze) getSolution() {
 	if endLinks < flow {
 		flow = endLinks
 	}
-	for m.solution == nil && flow > 0 {
+	for m.sol == nil && flow > 0 {
 		m.getOptimize(flow, 0, []int{})
 		flow--
 	}
+	m.getSolutionSorted()
 }
 
 func (m *maze) getOptimize(flow, cur int, paths []int) {
@@ -24,8 +25,8 @@ func (m *maze) getOptimize(flow, cur int, paths []int) {
 			for _, path := range newPaths {
 				length += m.paths[path].length
 			}
-			if m.solution == nil || m.solution.length > length {
-				m.solution = &solution{paths: newPaths, length: length}
+			if m.sol == nil || m.sol.length > length {
+				m.sol = &solution{paths: newPaths, length: length}
 			}
 		} else {
 			m.getOptimize(flow, i+1, newPaths)
@@ -44,4 +45,13 @@ func (m *maze) isPathsClash(cur int, sol []int) bool {
 		}
 	}
 	return false
+}
+
+func (m *maze) getSolutionSorted() {
+	for i := 0; i < len(m.sol.paths)-1; i++ {
+		cur, next := m.sol.paths[i], m.sol.paths[i+1]
+		if m.paths[cur].length < m.paths[next].length {
+			m.sol.paths[i], m.sol.paths[i+1] = m.sol.paths[i+1], m.sol.paths[i]
+		}
+	}
 }
