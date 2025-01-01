@@ -25,18 +25,9 @@ func main() {
 		checkErr(fmt.Errorf("ERROR: no paths found"))
 	}
 	maze.getSolution()
-	maze.getAntCnt()
+	maze.getAntsAssignment()
 
-	fmt.Printf("any qty: %v\n", maze.antQty)
-
-	fmt.Println("Paths found:")
-	for i, path := range maze.paths {
-		fmt.Printf("%v, %v\n", i, path)
-	}
-	fmt.Println("Solution found: ")
-	for _, path := range maze.sol.paths {
-		fmt.Printf("%v, %v\n", path, maze.paths[path].seq)
-	}
+	maze.printMaze()
 	fmt.Println()
 	maze.getMoving()
 }

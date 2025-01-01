@@ -16,9 +16,11 @@ type room struct {
 }
 
 type path struct {
-	seq    []string
-	length int
-	antCnt int
+	seq           []string
+	length        int
+	antsAssigned  int
+	antProcessing int
+	antsProcessed int
 }
 
 type solution struct {

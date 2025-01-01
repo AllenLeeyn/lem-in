@@ -6,6 +6,28 @@ import (
 	"strings"
 )
 
+func (m *maze) printMaze() {
+	fmt.Println(m.antQty)
+	for name, room := range m.rooms {
+		if room == m.rooms[m.start] {
+			fmt.Println("##start")
+		}
+		if room == m.rooms[m.end] {
+			fmt.Println("##end")
+		}
+		fmt.Printf("%v %d %d\n", name, room.x, room.y)
+	}
+	visted := []string{}
+	for name, room := range m.rooms {
+		for _, link := range room.linkTo {
+			if isVisited(visted, link) {
+				fmt.Printf("%s-%s\n", link, name)
+			}
+		}
+		visted = append(visted, name)
+	}
+
+}
 func (m *maze) setMaze(fileInput []string) error {
 	if antQty, err := strconv.Atoi(fileInput[0]); err != nil {
 		return fmt.Errorf("ERROR: invalid data format, %s is too many / too few ants",
@@ -13,7 +35,6 @@ func (m *maze) setMaze(fileInput []string) error {
 	} else {
 		m.antQty = antQty
 	}
-
 	if err := m.setRooms(fileInput); err != nil {
 		return err
 	}
