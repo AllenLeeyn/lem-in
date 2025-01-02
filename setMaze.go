@@ -32,7 +32,10 @@ func (m *maze) printMaze() {
 func (m *maze) setMaze(fileInput []string) error {
 	antQty, err := strconv.Atoi(fileInput[0])
 	if err != nil {
-		return fmt.Errorf("ERROR: invalid data format, %s is too many / too few ants",
+		return fmt.Errorf("ERROR: invalid data format; %s is not a valid ant quantity",
+			fileInput[0])
+	} else if antQty < 1 { //check too few ants
+		return fmt.Errorf("ERROR: %s is not a valid ant quantity",
 			fileInput[0])
 	}
 	m.antQty = antQty
@@ -47,13 +50,19 @@ func (m *maze) setMaze(fileInput []string) error {
 
 func (m *maze) setRooms(fileInput []string) error {
 	typeOf, entryCnt, i := "", 0, 0
+	/* //check if file contains start/end rooms
+	if !slices.Contains(fileInput, "##start") || !slices.Contains(fileInput, "##end") {
+		return fmt.Errorf("ERROR: Provided text has no start and/or end specified.\n")
+	} */
 
 	for ; i < len(fileInput); i++ {
+
 		typeOf = ""
 		if fileInput[i] == "##start" || fileInput[i] == "##end" {
 			typeOf = fileInput[i][2:]
 			i++
 		}
+
 		if !strings.Contains(fileInput[i], " ") {
 			continue
 		}
