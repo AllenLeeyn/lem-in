@@ -13,8 +13,7 @@ func main() {
 		fmt.Println("USAGE: go run . <filename.txt>")
 		return
 	}
-	fileName := os.Args[1]
-	fileInput, err := getInput(fileName)
+	fileInput, err := getInput(os.Args[1])
 	checkErr(err)
 
 	m := maze{rooms: make(map[string]*room)}
@@ -25,8 +24,14 @@ func main() {
 	if len(m.paths) == 0 {
 		checkErr(fmt.Errorf("ERROR: no paths found"))
 	}
+
 	m.getSolution()
 	m.getAntsAssignment()
+
+	for _, id := range m.sol.pathID {
+		fmt.Println(m.paths[id])
+	}
+
 	m.printMaze()
 	m.getMoving()
 }

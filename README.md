@@ -43,11 +43,11 @@ This `lem-in` project is a digital version of an ant farm. The goals of the prog
 
 ## Task
 
-- read file
-- validate input
-- get number of ants
-- get rooms
-- map out rooms and links/tunnels (?)
+start/end detetion (Jedi)
+AntsAssignment (Inka)
+Build result when setMaze() (Allen)
+Refactor getMoving(). need to make it more readable (Allen)
+error handling, check one room in isValidLink()
 
 #### example00
 

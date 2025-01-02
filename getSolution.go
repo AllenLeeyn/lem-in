@@ -13,23 +13,23 @@ func (m *maze) getSolution() {
 	m.getSolutionSorted()
 }
 
-func (m *maze) getOptimize(flow, cur int, paths []int) {
+func (m *maze) getOptimize(flow, cur int, pathID []int) {
 	for i := cur; i < len(m.paths); i++ {
-		if m.isPathsClash(i, paths) {
+		if m.isPathsClash(i, pathID) {
 			continue
 		}
-		newPaths := append(paths, i)
+		newPathID := append(pathID, i)
 
-		if len(newPaths) == flow {
+		if len(newPathID) == flow {
 			length := 0
-			for _, path := range newPaths {
+			for _, path := range newPathID {
 				length += m.paths[path].length
 			}
 			if m.sol == nil || m.sol.length > length {
-				m.sol = &solution{paths: newPaths, length: length}
+				m.sol = &solution{pathID: newPathID, length: length}
 			}
 		} else {
-			m.getOptimize(flow, i+1, newPaths)
+			m.getOptimize(flow, i+1, newPathID)
 		}
 	}
 }
@@ -48,11 +48,11 @@ func (m *maze) isPathsClash(cur int, sol []int) bool {
 }
 
 func (m *maze) getSolutionSorted() {
-	for i := 0; i < len(m.sol.paths)-1; i++ {
-		cur, next := m.sol.paths[i], m.sol.paths[i+1]
+	for i := 0; i < len(m.sol.pathID)-1; i++ {
+		cur, next := m.sol.pathID[i], m.sol.pathID[i+1]
 		if m.paths[cur].length < m.paths[next].length {
-			m.sol.paths[i], m.sol.paths[i+1] =
-				m.sol.paths[i+1], m.sol.paths[i]
+			m.sol.pathID[i], m.sol.pathID[i+1] =
+				m.sol.pathID[i+1], m.sol.pathID[i]
 		}
 	}
 }

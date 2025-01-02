@@ -10,48 +10,48 @@ func (m *maze) getMoving() {
 		fmt.Printf("Turn %03d:", turns+1)
 
 		// for each path in solution
-		for _, path := range m.sol.paths {
+		for _, id := range m.sol.pathID {
 			// if ants assigned are processed, path is done
-			if m.paths[path].antsProcessed == m.paths[path].antsAssigned {
+			if m.paths[id].antsProcessed == m.paths[id].antsAssigned {
 				continue
 			}
 
-			if len(m.paths[path].seq) == 0 {
+			if len(m.paths[id].seq) == 0 {
 				fmt.Printf(" L%v-%s", nextAnt, m.end)
-				m.paths[path].antProcessing++
-				m.paths[path].antsProcessed++
+				m.paths[id].antProcessing++
+				m.paths[id].antsProcessed++
 				exitCnt++
 				nextAnt++
 				continue
 			}
 
 			// get last room to know when to print exit
-			lastIndex := len(m.paths[path].seq) - 1
-			lastRoom := m.paths[path].seq[lastIndex]
+			lastIndex := len(m.paths[id].seq) - 1
+			lastRoom := m.paths[id].seq[lastIndex]
 
 			// for each room in path
-			for i, room := range m.paths[path].seq {
+			for i, room := range m.paths[id].seq {
 				// if room is the last room
-				if room == lastRoom && m.rooms[room].antNm != 0 {
-					fmt.Printf(" L%v-%s", m.rooms[room].antNm, m.end)
-					m.paths[path].antsProcessed++
+				if room == lastRoom && m.rooms[room].antID != 0 {
+					fmt.Printf(" L%v-%s", m.rooms[room].antID, m.end)
+					m.paths[id].antsProcessed++
 					exitCnt++
 				}
 
-				if i == 0 && m.paths[path].antProcessing < m.paths[path].antsAssigned {
-					prevAnt, m.rooms[room].antNm = m.rooms[room].antNm, nextAnt
+				if i == 0 && m.paths[id].antProcessing < m.paths[id].antsAssigned {
+					prevAnt, m.rooms[room].antID = m.rooms[room].antID, nextAnt
 					fmt.Printf(" L%v-%s", nextAnt, room)
-					m.paths[path].antProcessing++
+					m.paths[id].antProcessing++
 					nextAnt++
 					continue
 				} else if i == 0 {
-					prevAnt, m.rooms[room].antNm = m.rooms[room].antNm, 0
+					prevAnt, m.rooms[room].antID = m.rooms[room].antID, 0
 					continue
 				}
 
-				m.rooms[room].antNm, prevAnt = prevAnt, m.rooms[room].antNm
-				if m.rooms[room].antNm != 0 {
-					fmt.Printf(" L%v-%s", m.rooms[room].antNm, room)
+				m.rooms[room].antID, prevAnt = prevAnt, m.rooms[room].antID
+				if m.rooms[room].antID != 0 {
+					fmt.Printf(" L%v-%s", m.rooms[room].antID, room)
 				}
 			}
 		}
@@ -61,14 +61,14 @@ func (m *maze) getMoving() {
 
 func (m *maze) getAntsAssignment() {
 	antQty := m.antQty
-	longestPath := m.paths[m.sol.paths[0]]
-	for _, path := range m.sol.paths {
-		m.paths[path].antsAssigned = longestPath.length - m.paths[path].length
-		antQty -= (longestPath.length - m.paths[path].length)
+	longestPath := m.paths[m.sol.pathID[0]]
+	for _, id := range m.sol.pathID {
+		m.paths[id].antsAssigned = longestPath.length - m.paths[id].length
+		antQty -= (longestPath.length - m.paths[id].length)
 	}
-	pathCnt := len(m.sol.paths)
-	for _, path := range m.sol.paths {
-		m.paths[path].antsAssigned += antQty / pathCnt
+	pathCnt := len(m.sol.pathID)
+	for _, id := range m.sol.pathID {
+		m.paths[id].antsAssigned += antQty / pathCnt
 		antQty -= antQty / pathCnt
 		pathCnt--
 

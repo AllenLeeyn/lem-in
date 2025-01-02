@@ -30,12 +30,12 @@ func (m *maze) printMaze() {
 }
 
 func (m *maze) setMaze(fileInput []string) error {
-	if antQty, err := strconv.Atoi(fileInput[0]); err != nil {
+	antQty, err := strconv.Atoi(fileInput[0])
+	if err != nil {
 		return fmt.Errorf("ERROR: invalid data format, %s is too many / too few ants",
 			fileInput[0])
-	} else {
-		m.antQty = antQty
 	}
+	m.antQty = antQty
 	if err := m.setRooms(fileInput); err != nil {
 		return err
 	}

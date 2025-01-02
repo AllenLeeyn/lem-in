@@ -5,17 +5,18 @@ type maze struct {
 	start  string
 	end    string
 	rooms  map[string]*room
-	paths  []path
+	paths  []pathStruct
 	sol    *solution
+	result []string
 }
 
 type room struct {
 	x, y   int
 	linkTo []string
-	antNm  int
+	antID  int
 }
 
-type path struct {
+type pathStruct struct {
 	seq           []string
 	length        int
 	antsAssigned  int
@@ -24,6 +25,6 @@ type path struct {
 }
 
 type solution struct {
-	paths  []int
+	pathID []int
 	length int
 }
