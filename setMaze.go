@@ -26,8 +26,9 @@ func (m *maze) printMaze() {
 		}
 		visted = append(visted, name)
 	}
-
+	fmt.Println()
 }
+
 func (m *maze) setMaze(fileInput []string) error {
 	if antQty, err := strconv.Atoi(fileInput[0]); err != nil {
 		return fmt.Errorf("ERROR: invalid data format, %s is too many / too few ants",

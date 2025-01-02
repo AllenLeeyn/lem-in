@@ -51,7 +51,8 @@ func (m *maze) getSolutionSorted() {
 	for i := 0; i < len(m.sol.paths)-1; i++ {
 		cur, next := m.sol.paths[i], m.sol.paths[i+1]
 		if m.paths[cur].length < m.paths[next].length {
-			m.sol.paths[i], m.sol.paths[i+1] = m.sol.paths[i+1], m.sol.paths[i]
+			m.sol.paths[i], m.sol.paths[i+1] =
+				m.sol.paths[i+1], m.sol.paths[i]
 		}
 	}
 }

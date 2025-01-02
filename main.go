@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -16,29 +17,29 @@ func main() {
 	fileInput, err := getInput(fileName)
 	checkErr(err)
 
-	maze := maze{rooms: make(map[string]*room)}
-	err = maze.setMaze(fileInput)
+	m := maze{rooms: make(map[string]*room)}
+	err = m.setMaze(fileInput)
 	checkErr(err)
 
-	maze.getPaths([]string{maze.start})
-	if len(maze.paths) == 0 {
+	m.getPaths([]string{m.start})
+	if len(m.paths) == 0 {
 		checkErr(fmt.Errorf("ERROR: no paths found"))
 	}
-	maze.getSolution()
-	maze.getAntsAssignment()
-
-	maze.printMaze()
-	fmt.Println()
-	maze.getMoving()
+	m.getSolution()
+	m.getAntsAssignment()
+	m.printMaze()
+	m.getMoving()
 }
 
+// getInput() read content of .txt file
 func getInput(filename string) ([]string, error) {
-	lastIndex := len(filename)
-	if lastIndex < 4 || filename[lastIndex-4:] != ".txt" {
-		return []string{}, fmt.Errorf("ERROR: only .txt files are allowed")
+	if !strings.HasSuffix(filename, ".txt") {
+		return nil, fmt.Errorf("ERROR: only .txt files are allowed")
 	}
 	file, err := os.Open(filename)
-	checkErr(err)
+	if err != nil {
+		return nil, err
+	}
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
