@@ -25,6 +25,6 @@ type pathStruct struct {
 }
 
 type solution struct {
-	pathID []int
-	length int
+	pathIDs []int
+	length  int
 }

@@ -1,5 +1,9 @@
 package main
 
+import "sort"
+
+// m.getSolution() get the optimal flow base on number of links in start/end
+// and searchSolution based on the flow.
 func (m *maze) getSolution() {
 	flow := len(m.rooms[m.start].linkTo)
 	endLinks := len(m.rooms[m.end].linkTo)
@@ -7,37 +11,40 @@ func (m *maze) getSolution() {
 		flow = endLinks
 	}
 	for m.sol == nil && flow > 0 {
-		m.getOptimize(flow, 0, []int{})
+		m.searchSolution(flow, 0, []int{})
 		flow--
 	}
-	m.getSolutionSorted()
+	m.sortSolution()
 }
 
-func (m *maze) getOptimize(flow, cur int, pathID []int) {
-	for i := cur; i < len(m.paths); i++ {
-		if m.isPathsClash(i, pathID) {
+// m.searchSolution() goes through all possible combination of paths
+// to find the optimal solution (maximum flow, minimum length)
+func (m *maze) searchSolution(flow, curID int, pathIDs []int) {
+	for ; curID < len(m.paths); curID++ {
+		if m.isPathsClash(curID, pathIDs) {
 			continue
 		}
-		newPathID := append(pathID, i)
 
-		if len(newPathID) == flow {
+		if newPathID := append(pathIDs, curID); len(newPathID) == flow {
 			length := 0
 			for _, path := range newPathID {
 				length += m.paths[path].length
 			}
 			if m.sol == nil || m.sol.length > length {
-				m.sol = &solution{pathID: newPathID, length: length}
+				m.sol = &solution{pathIDs: newPathID, length: length}
 			}
 		} else {
-			m.getOptimize(flow, i+1, newPathID)
+			m.searchSolution(flow, curID+1, newPathID)
 		}
 	}
 }
 
-func (m *maze) isPathsClash(cur int, sol []int) bool {
-	for _, path := range sol {
-		for _, room := range m.paths[path].seq {
-			for _, clash := range m.paths[cur].seq {
+// m.isPathsClash() check if current path clashes with any paths
+// in the current potential solution
+func (m *maze) isPathsClash(curID int, pathID []int) bool {
+	for _, id := range pathID {
+		for _, room := range m.paths[id].seq {
+			for _, clash := range m.paths[curID].seq {
 				if room == clash {
 					return true
 				}
@@ -47,12 +54,10 @@ func (m *maze) isPathsClash(cur int, sol []int) bool {
 	return false
 }
 
-func (m *maze) getSolutionSorted() {
-	for i := 0; i < len(m.sol.pathID)-1; i++ {
-		cur, next := m.sol.pathID[i], m.sol.pathID[i+1]
-		if m.paths[cur].length < m.paths[next].length {
-			m.sol.pathID[i], m.sol.pathID[i+1] =
-				m.sol.pathID[i+1], m.sol.pathID[i]
-		}
-	}
+// m.sortSolution() sorts m.sol.pathIDs in
+// a decreasing order based on path's length
+func (m *maze) sortSolution() {
+	sort.Slice(m.sol.pathIDs, func(i, j int) bool {
+		return m.paths[m.sol.pathIDs[i]].length > m.paths[m.sol.pathIDs[j]].length
+	})
 }

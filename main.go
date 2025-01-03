@@ -24,14 +24,8 @@ func main() {
 	if len(m.paths) == 0 {
 		checkErr(fmt.Errorf("ERROR: no paths found"))
 	}
-
 	m.getSolution()
 	m.getAntsAssignment()
-
-	for _, id := range m.sol.pathID {
-		fmt.Println(m.paths[id])
-	}
-
 	m.printMaze()
 	m.getMoving()
 }

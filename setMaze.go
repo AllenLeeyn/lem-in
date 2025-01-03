@@ -6,39 +6,19 @@ import (
 	"strings"
 )
 
+// m.printMaze() prints the input given
 func (m *maze) printMaze() {
-	fmt.Println(m.antQty)
-	for name, room := range m.rooms {
-		if room == m.rooms[m.start] {
-			fmt.Println("##start")
-		}
-		if room == m.rooms[m.end] {
-			fmt.Println("##end")
-		}
-		fmt.Printf("%v %d %d\n", name, room.x, room.y)
-	}
-	visted := []string{}
-	for name, room := range m.rooms {
-		for _, link := range room.linkTo {
-			if isVisited(visted, link) {
-				fmt.Printf("%s-%s\n", link, name)
-			}
-		}
-		visted = append(visted, name)
+	for _, line := range m.result {
+		fmt.Println(line)
 	}
 	fmt.Println()
 }
 
+// m.setMaze() process the fileInput set the maze definition/parameters
 func (m *maze) setMaze(fileInput []string) error {
-	antQty, err := strconv.Atoi(fileInput[0])
-	if err != nil {
-		return fmt.Errorf("ERROR: invalid data format; %s is not a valid ant quantity",
-			fileInput[0])
-	} else if antQty < 1 { //check too few ants
-		return fmt.Errorf("ERROR: %s is not a valid ant quantity",
-			fileInput[0])
+	if err := m.setAntQty(fileInput[0]); err != nil {
+		return err
 	}
-	m.antQty = antQty
 	if err := m.setRooms(fileInput); err != nil {
 		return err
 	}
@@ -48,6 +28,23 @@ func (m *maze) setMaze(fileInput []string) error {
 	return nil
 }
 
+// m.setAntQty() process the first line of fileInput for antQty
+func (m *maze) setAntQty(fileInput string) error {
+	antQty, err := strconv.Atoi(fileInput)
+	if err != nil {
+		return fmt.Errorf("ERROR: invalid data format; %s is not a valid ant quantity",
+			fileInput)
+	} else if antQty < 1 { //check too few ants
+		return fmt.Errorf("ERROR: %s is not a valid ant quantity",
+			fileInput)
+	}
+	m.antQty, m.result = antQty, append(m.result, fileInput)
+	return nil
+}
+
+// m.setRooms() process the whole inputFile for valid room definition.
+// it records a room as the start/end base if a proper declaration is
+// given in the previous line (##start/ ##end).
 func (m *maze) setRooms(fileInput []string) error {
 	typeOf, entryCnt, i := "", 0, 0
 	/* //check if file contains start/end rooms
@@ -59,6 +56,7 @@ func (m *maze) setRooms(fileInput []string) error {
 
 		typeOf = ""
 		if fileInput[i] == "##start" || fileInput[i] == "##end" {
+			m.result = append(m.result, fileInput[i])
 			typeOf = fileInput[i][2:]
 			i++
 		}
@@ -71,6 +69,7 @@ func (m *maze) setRooms(fileInput []string) error {
 			return fmt.Errorf("ERROR: invalid data format. Check room Values: %s", fileInput[i])
 		}
 		m.rooms[name] = &room{x: x, y: y}
+		m.result = append(m.result, fileInput[i])
 
 		switch typeOf {
 		case "start":
@@ -85,6 +84,9 @@ func (m *maze) setRooms(fileInput []string) error {
 	return nil
 }
 
+// m.setRoom() process a room defintion line.
+// It accepts 3 inputs split by space, and no '-' is allowed in the line.
+// It also checks if there is repeat of room name or coordinates.
 func (m *maze) setRoom(rmValues string) (string, int, int, bool) {
 	values := strings.Fields(rmValues)
 	if len(values) != 3 || strings.Contains(rmValues, "-") {
@@ -110,6 +112,7 @@ func (m *maze) setRoom(rmValues string) (string, int, int, bool) {
 	return name, x, y, true
 }
 
+// m.setLinks() process the whole inputFile for valid link definition.s
 func (m *maze) setLinks(fileInput []string) error {
 	for i := 0; i < len(fileInput); i++ {
 		if !strings.Contains(fileInput[i], "-") {
@@ -121,18 +124,21 @@ func (m *maze) setLinks(fileInput []string) error {
 		}
 		m.rooms[link[0]].linkTo = append(m.rooms[link[0]].linkTo, link[1])
 		m.rooms[link[1]].linkTo = append(m.rooms[link[1]].linkTo, link[0])
+		m.result = append(m.result, fileInput[i])
 	}
 	return nil
 }
 
-func (m *maze) isValidLink(link0, link1 string) bool {
-	_, isExist0 := m.rooms[link0]
-	room1, isExist1 := m.rooms[link1]
-	if !isExist0 || !isExist1 || link0 == link1 {
+// m.isValidLink() checks if link given is valid.
+// It checks if rooms in link exist and if the link is already establish.
+func (m *maze) isValidLink(roomA, roomB string) bool {
+	_, isExistA := m.rooms[roomA]
+	room, isExistB := m.rooms[roomB]
+	if !isExistA || !isExistB || roomA == roomB {
 		return false
 	}
-	for _, existed := range room1.linkTo {
-		if link0 == existed {
+	for _, existed := range room.linkTo {
+		if roomA == existed {
 			return false
 		}
 	}
