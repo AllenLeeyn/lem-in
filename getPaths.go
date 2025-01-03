@@ -4,14 +4,15 @@ package main
 func (m *maze) getPaths(curPath []string) {
 	length := len(curPath)
 	curRoom := curPath[length-1]
+	newPath := append([]string{}, curPath...)
 	for _, nextRoom := range m.rooms[curRoom].linkTo {
 		if nextRoom == m.end {
 			m.paths = append(m.paths,
-				pathStruct{seq: curPath[1:], length: length})
+				pathStruct{seq: newPath[1:], length: length})
 			continue
 		}
-		if !isVisited(curPath, nextRoom) {
-			m.getPaths(append(curPath, nextRoom))
+		if !isVisited(newPath, nextRoom) {
+			m.getPaths(append(newPath, nextRoom))
 		}
 	}
 }

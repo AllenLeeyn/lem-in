@@ -24,13 +24,14 @@ func main() {
 	if len(m.paths) == 0 {
 		checkErr(fmt.Errorf("ERROR: no paths found"))
 	}
+
 	m.getSolution()
 	m.getAntsAssignment()
 	m.printMaze()
 	m.getMoving()
 }
 
-// getInput() reads contents of .txt file
+// getInput() reads contents of .txt file. Ignore empty newlines and comments
 func getInput(filename string) ([]string, error) {
 	if !strings.HasSuffix(filename, ".txt") {
 		return nil, fmt.Errorf("ERROR: only .txt files are allowed")
@@ -44,7 +45,11 @@ func getInput(filename string) ([]string, error) {
 	scanner := bufio.NewScanner(file)
 	var fileInput []string
 	for scanner.Scan() {
-		fileInput = append(fileInput, scanner.Text())
+		fileLine := scanner.Text()
+		if strings.HasPrefix(fileLine, "#") && !strings.HasPrefix(fileLine, "##") {
+			continue
+		}
+		fileInput = append(fileInput, fileLine)
 	}
 	return fileInput, scanner.Err()
 }
