@@ -37,17 +37,22 @@ This `lem-in` project is a digital version of an ant farm. The goals of the prog
   - link to unknown rooms
   - room with invalid coordinates
   - a variety of invalid or poorly formatted input
-  - A room will never start with the letter _L_ or with _#_ and must have no spaces
+  - A room name will never start with the letter `L` or with symbol `#` and must have no spaces
   - two rooms can't have more than one tunnel connecting them
   - each room can contain only one ant at a time
 
 ## Task
 
-- read file (Jedi)
-- validate input (Jedi)
-- get number of ants (Jedi)
-- get rooms (Jedi)
-- map out rooms and links/tunnels (?)
+- test files (Jedi)
+- AntsAssignment (Inka)
+- Refactor getMoving(). need to make it more readable (Allen)
+- flowchart for program (Jedi)
+- color coding antsMovement for easier tracking
+- optimize solution finding
+    - group paths based on first room
+    - sort paths in ascending order of length
+    - if number of groupings left while searching for a solution is not able to form a solution, decrease flow
+- visualization.
 
 #### example00
 
@@ -65,10 +70,10 @@ flowchart LR
 ```mermaid
 flowchart LR
     Start{start} ==> t([t]) ==> E([E]) ==> a([a]) ==> m([m]) ==> End[end]
+    Start{start} ==> 0([0]) ==> o([o]) ==> n([n]) ==> e([e]) ==> End[end]
     Start{start} ==> h([h]) ==> A([A]) ==> c([c]) ==> k([k]) ==> End[end]
     h([h]) -.-> n([n])
     n([n]) -.-> m([m])
-    Start{start} ==> 0([0]) ==> o([o]) ==> n([n]) ==> e([e]) ==> End[end]
 
 %%style
     style Start fill:green
@@ -118,15 +123,14 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-Start{start} ==> A0([A0]) ==> A1([A1]) ==> A2([A2]) ==> End[end]
-Start{start} ==> C0([C0]) ==> C1([C1]) ==> C2([C2]) ==> C3([C3]) ==> I4([I4]) ==> I5([I5]) ==> End[end]
-Start{start} -.-> G1([G1]) -.-> G2([G2]) -.-> G3([G3]) -.-> G4([G4]) -.-> D3([D3])
-Start{start} ==> B0([B0]) ==> B1([B1]) ==> E2([E2]) ==> D2([D2]) ==> D3([D3]) ==> End[end]
-A0([A0]) -.-> D1([D1]) -.-> F2([F2]) -.-> F3([F3]) -.-> F4([F4]) -.-> End[end]
-A1([A1]) -.-> B1([B1])
+Start{start} ==> B0([B0]) ==> B1([B1]) ==> E2([E2]) ==> D2([D2]) ==> F3([F3]) ==> F4([F4]) ==> End[end]
+Start{start} ==> A0([A0]) ==> A1([A1]) ====> A2([A2]) ==> End[end]
 A2([A2]) -.-> C3([C3])
-D2([D2]) -.-> F3([F3])
-F2([F2]) -.-> H3([H3]) -.-> H4([H4])
+Start{start} ==> C0([C0]) ==> C1([C1]) ==> C2([C2]) ====> C3([C3]) ==> I4([I4]) ==> I5([I5]) ==> End[end]
+
+A0([A0]) -.-> D1([D1]) -.-> F2([F2]) -.-> H3([H3]) -.-> H4([H4])
+Start{start} ==> G0([G0]) ==> G1([G1]) ==> G2([G2]) ==> G3([G3]) ==> G4([G4]) ==> D3([D3]) ==> End[end]
+A1([A1]) -.-> B1([B1])
 
 %%style
     style Start fill:green

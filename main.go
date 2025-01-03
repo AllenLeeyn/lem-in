@@ -2,136 +2,60 @@ package main
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
-	"slices"
-	"strconv"
 	"strings"
-)
-
-type Lemz struct {
-	filename string
-	txtLines []string
-	antQty   int
-	start    string
-	end      string
-	rmNames  []string
-	rooms    [][3]string
-	//linkValues [2]string
-	links            [][2]string
-	graph            map[string][]string // for adjacency list
-	paths            [][]string          // found paths from start to end
-	pathsSingleOrder [][]string
-	result           string
-}
-
-var (
-	err        error
-	LinkValues [2]string
-	rmValues   []string
-	aPath      []string
 )
 
 func main() {
 	if len(os.Args) != 2 {
-		log.Fatal(fmt.Errorf("USAGE: Please provide the filename for the TXT file to be read."))
+		fmt.Println("USAGE: go run . <filename.txt>")
 		return
 	}
+	fileInput, err := getInput(os.Args[1])
+	checkErr(err)
 
-	//defining stuff
-	l := Lemz{
-		filename: os.Args[1],
+	m := maze{rooms: make(map[string]*room)}
+	err = m.setMaze(fileInput)
+	checkErr(err)
+
+	m.getPaths([]string{m.start})
+	if len(m.paths) == 0 {
+		checkErr(fmt.Errorf("ERROR: no paths found"))
 	}
 
-	// running funcs to get data from TXT file
-	if !l.CheckFile(l.filename) {
-		return
-	}
-	l.txtLines, err = l.ReadInput(l.filename)
-	if err != nil {
-		log.Fatal(fmt.Errorf("ReadInputError: %s\n", err))
-		return
-	}
-	l.antQty, err = strconv.Atoi(l.txtLines[0])
-	if err != nil {
-		log.Fatal(fmt.Errorf("antQtyError: %s\n", err))
-		return
-	}
-	if !l.CheckTxt(l.txtLines) {
-		return
-	}
-	l.start, l.end = l.GetStartEnd(l.txtLines)
-
-	l.rooms = l.GetRms(l.txtLines)
-	l.links = l.GetLinks(l.txtLines)
-
-	// Run Edmonds-Karp to find paths
-	l.EdmondsKarp()
-
-	// Print found paths
-	//fmt.Printf("Found paths: %#v\n", l.paths)
-
-	/*fmt.Printf("GetPathSingleOrder(l.links): %#v\n", l.GetPathSingleOrder(l.links))
-		l.paths = l.EdmondsKarps(len(l.rooms), l.start, l.end)
-	  	fmt.Printf("paths: %#v\n", l.paths) */
-	//PRINT FINAL RESULT
-	fmt.Printf("Lemz: %#v\n", l)
-
-	// Simulate and print the ant movements
-	fmt.Println(strings.Join(l.txtLines, "\n") + "\n")
-	l.SimulateAntMovement()
-
+	m.getSolution()
+	m.getAntsAssignment()
+	m.printMaze()
+	m.getMoving()
 }
 
-// check if filename provided in os.Args is OK
-func (l *Lemz) CheckFile(filename string) bool {
-	// check TXT file format/ext
-	if ext := filepath.Ext(l.filename); ext == "" || ext != ".txt" {
-		log.Fatal(fmt.Errorf("CheckFileError: Unsupported file format with extension '%s'. Only TXT files are allowed.\n", filepath.Ext(l.filename)))
-		return false
+// getInput() reads contents of .txt file. Ignore empty newlines and comments
+func getInput(filename string) ([]string, error) {
+	if !strings.HasSuffix(filename, ".txt") {
+		return nil, fmt.Errorf("ERROR: only .txt files are allowed")
 	}
-	// check if file even exists
-	_, err = os.Stat("./examples/" + l.filename)
-	if errors.Is(err, os.ErrNotExist) {
-		log.Fatal(fmt.Errorf("CheckFileError: '%s' does not exist.\n", l.filename))
-		return false
-	}
-	return true
-}
-
-// read TXT file
-func (l *Lemz) ReadInput(filename string) ([]string, error) {
-	fileContent, err := os.Open("./examples/" + l.filename)
+	file, err := os.Open(filename)
 	if err != nil {
-		return nil, fmt.Errorf("OpenError: %s: ", err)
+		return nil, err
 	}
-	defer fileContent.Close()
+	defer file.Close()
 
-	scanner := bufio.NewScanner(fileContent)
-	var fileSlice []string
+	scanner := bufio.NewScanner(file)
+	var fileInput []string
 	for scanner.Scan() {
-		fileSlice = append(fileSlice, scanner.Text())
+		fileLine := scanner.Text()
+		if strings.HasPrefix(fileLine, "#") && !strings.HasPrefix(fileLine, "##") {
+			continue
+		}
+		fileInput = append(fileInput, fileLine)
 	}
-	if err = scanner.Err(); err != nil {
-		return nil, fmt.Errorf("ScannerError: %s.", err)
-	}
-	return fileSlice, nil
+	return fileInput, scanner.Err()
 }
 
-func (l *Lemz) CheckTxt(txtLines []string) bool {
-
-	//check quantity of ants
-	if l.antQty < 1 || l.antQty > 9223372036854775807 { //too many is > max int64
-		log.Fatal(fmt.Errorf("CheckTxt_antQtyError: %d is too many / too few ants.\n", l.antQty))
-		return false
+func checkErr(err error) {
+	if err != nil {
+		log.Fatal(err)
 	}
-
-	if !slices.Contains(l.txtLines, "##start") || !slices.Contains(l.txtLines, "##end") {
-		log.Fatal(fmt.Errorf("CheckTxtError: Provided text has no start and/or end specified.\n"))
-		return false
-	}
-	return true
 }
