@@ -1,6 +1,8 @@
 package main
 
-import "sort"
+import (
+	"sort"
+)
 
 // m.getSolution() get the optimal flow base on number of links in start/end
 // and searchSolution based on the flow.
@@ -14,6 +16,9 @@ func (m *maze) getSolution() {
 		m.searchSolution(flow, 0, []int{})
 		flow--
 	}
+	for _, id := range m.sol.pathIDs {
+		m.paths[id].seq = append(m.paths[id].seq, m.end)
+	}
 	m.sortSolution()
 }
 
@@ -24,8 +29,9 @@ func (m *maze) searchSolution(flow, curID int, pathIDs []int) {
 		if m.isPathsClash(curID, pathIDs) {
 			continue
 		}
-
-		if newPathID := append(pathIDs, curID); len(newPathID) == flow {
+		newPathID := append([]int{}, pathIDs...)
+		newPathID = append(newPathID, curID)
+		if len(newPathID) == flow {
 			length := 0
 			for _, path := range newPathID {
 				length += m.paths[path].length
