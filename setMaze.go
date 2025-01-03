@@ -46,41 +46,36 @@ func (m *maze) setAntQty(fileInput string) error {
 // it records a room as the start/end base if a proper declaration is
 // given in the previous line (##start/ ##end).
 func (m *maze) setRooms(fileInput []string) error {
-	typeOf, entryCnt, i := "", 0, 0
-	/* //check if file contains start/end rooms
-	if !slices.Contains(fileInput, "##start") || !slices.Contains(fileInput, "##end") {
-		return fmt.Errorf("ERROR: Provided text has no start and/or end specified.\n")
-	} */
+	startCount, endCount, i := 0, 0, 0
 
 	for ; i < len(fileInput); i++ {
+		name, x, y, isOk := m.setRoom(fileInput[i])
 
-		typeOf = ""
-		if fileInput[i] == "##start" || fileInput[i] == "##end" {
+		if fileInput[i] == "##start" {
 			m.result = append(m.result, fileInput[i])
-			typeOf = fileInput[i][2:]
+			m.start = name
+			startCount++
+			i++
+		} else if fileInput[i] == "##end" {
+			m.result = append(m.result, fileInput[i])
+			m.end = name
+			endCount++
 			i++
 		}
 
 		if !strings.Contains(fileInput[i], " ") {
 			continue
 		}
-		name, x, y, isOk := m.setRoom(fileInput[i])
+		if startCount != 1 || endCount != 1 {
+			return fmt.Errorf("ERROR: invalid data format. Check quantity of start/end rooms")
+		}
 		if !isOk {
-			return fmt.Errorf("ERROR: invalid data format. Check room Values: %s", fileInput[i])
+			return fmt.Errorf("ERROR: invalid data format. Check room values: %s", fileInput[i])
 		}
 		m.rooms[name] = &room{x: x, y: y}
 		m.result = append(m.result, fileInput[i])
+	}
 
-		switch typeOf {
-		case "start":
-			m.start, entryCnt = name, entryCnt+1
-		case "end":
-			m.end, entryCnt = name, entryCnt-2
-		}
-	}
-	if entryCnt != -1 {
-		return fmt.Errorf("ERROR: invalid data format. Check start/end rooms")
-	}
 	return nil
 }
 

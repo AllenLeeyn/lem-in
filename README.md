@@ -43,11 +43,10 @@ This `lem-in` project is a digital version of an ant farm. The goals of the prog
 
 ## Task
 
-- start/end detection (Jedi)
 - test files (Jedi)
 - AntsAssignment (Inka)
 - Refactor getMoving(). need to make it more readable (Allen)
-- flowchart for program
+- flowchart for program (Jedi)
 - color coding antsMovement for easier tracking
 - visualization.
 
