@@ -24,6 +24,7 @@ func main() {
 	if len(m.paths) == 0 {
 		checkErr(fmt.Errorf("ERROR: no paths found"))
 	}
+
 	m.getSolution()
 	m.getAntsAssignment()
 	m.printMaze()
@@ -44,7 +45,11 @@ func getInput(filename string) ([]string, error) {
 	scanner := bufio.NewScanner(file)
 	var fileInput []string
 	for scanner.Scan() {
-		fileInput = append(fileInput, scanner.Text())
+		fileLine := scanner.Text()
+		if strings.HasPrefix(fileLine, "#") && !strings.HasPrefix(fileLine, "##") {
+			continue
+		}
+		fileInput = append(fileInput, fileLine)
 	}
 	return fileInput, scanner.Err()
 }
