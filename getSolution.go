@@ -64,6 +64,6 @@ func (m *maze) isPathsClash(curID int, pathID []int) bool {
 // a decreasing order based on path's length
 func (m *maze) sortSolution() {
 	sort.Slice(m.sol.pathIDs, func(i, j int) bool {
-		return m.paths[m.sol.pathIDs[i]].length > m.paths[m.sol.pathIDs[j]].length
+		return m.paths[m.sol.pathIDs[i]].length < m.paths[m.sol.pathIDs[j]].length
 	})
 }

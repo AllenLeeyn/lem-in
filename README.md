@@ -50,6 +50,7 @@ This `lem-in` project is a digital version of an ant farm. The goals of the prog
 - color coding antsMovement for easier tracking
 - optimize solution finding
     - group paths based on first room
+    - sort paths in ascending order of length
     - if number of groupings left while searching for a solution is not able to form a solution, decrease flow
 - visualization.
 
