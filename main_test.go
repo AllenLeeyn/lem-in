@@ -40,8 +40,17 @@ func TestSetMaze(t *testing.T) {
 		{"ValidAntQtyEx06", "examples/example06.txt", 100, false},
 		{"ValidAntQtyEx07", "examples/example07.txt", 1000, false},
 		{"InvalidAntQtyZero", "examples/badexample00.txt", 0, true},
+		{"InvalidAntQtyNotInt", "tests/badexample0a.txt", 0, true}, // first line is '0a' (not an int)
 		{"InvalidAntQtyOverMaxInt64", "tests/badexample_overMaxInt64.txt", 0, true},
 		{"InvalidAntQtyNotInt", "tests/badexample0a.txt", 0, true},
+		{"InvalidRoomsOrLinks", "examples/badexample01.txt", 20, true},        // invalid link 3-3
+		{"InvalidRoomsOrLinks", "tests/bad_2dashes.txt", 4, true},             // invalid link 2--3
+		{"InvalidRoomsOrLinks", "tests/bad_3S2E.txt", 4, true},                // >1 ##start/##end
+		{"InvalidRoomsOrLinks", "tests/badexample_noEnd.txt", 1, true},        // no ##end
+		{"InvalidRoomsOrLinks", "tests/badexample_noStart.txt", 1, true},      // no ##start
+		{"InvalidRoomsOrLinks", "tests/badexample_noEndValue.txt", 4, true},   // no end room (line after ##end is invalid)
+		{"InvalidRoomsOrLinks", "tests/badexample_noStartValue.txt", 4, true}, // no start room (line after ##start is invalid)
+		{"InvalidRoomsOrLinks", "tests/badexample_sameStartEnd.txt", 4, true}, // start room name = end room name
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
