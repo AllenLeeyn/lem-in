@@ -46,50 +46,34 @@ func (m *maze) setAntQty(fileInput string) error {
 // it records a room as the start/end base if a proper declaration is
 // given in the previous line (##start/ ##end).
 func (m *maze) setRooms(fileInput []string) error {
-	startCount, endCount := 0, 0
+	startCount, endCount, found := 0, 0, ""
 
 	for i := 0; i < len(fileInput); i++ {
-		if fileInput[i] == "##start" {
+		if fileInput[i] == "##start" || fileInput[i] == "##end" {
 			m.result = append(m.result, fileInput[i])
-			i++
-			if i < len(fileInput) {
-				name, x, y, isOk := m.setRoom(fileInput[i])
-				m.start = name
-				startCount++
-				if !isOk {
-					return fmt.Errorf("ERROR: invalid data format. Check room values: %s", fileInput[i])
-				}
-				m.rooms[name] = &room{x: x, y: y}
-				m.result = append(m.result, fileInput[i])
+			found = fileInput[i]
+			if i+1 < len(fileInput) {
+				i++
 			}
-			continue
-		} else if fileInput[i] == "##end" {
-			m.result = append(m.result, fileInput[i])
-			i++
-			if i < len(fileInput) {
-				name, x, y, isOk := m.setRoom(fileInput[i])
-				m.end = name
-				endCount++
-				if !isOk {
-					return fmt.Errorf("ERROR: invalid data format. Check room values: %s", fileInput[i])
-				}
-				m.rooms[name] = &room{x: x, y: y}
-				m.result = append(m.result, fileInput[i])
-			}
-			continue
 		}
 
-		name, x, y, isOk := m.setRoom(fileInput[i])
 		if !strings.Contains(fileInput[i], " ") {
 			continue
 		}
+		name, isOk := m.setRoom(fileInput[i])
 		if !isOk {
 			return fmt.Errorf("ERROR: invalid data format. Check room values: %s", fileInput[i])
 		}
-		m.rooms[name] = &room{x: x, y: y}
+		switch found {
+		case "##start":
+			m.start, found = name, ""
+			startCount++
+		case "##end":
+			m.end, found = name, ""
+			endCount++
+		}
 		m.result = append(m.result, fileInput[i])
 	}
-
 	if startCount != 1 || endCount != 1 {
 		return fmt.Errorf("ERROR: invalid data format. Check quantity of start/end rooms")
 	}
@@ -100,29 +84,30 @@ func (m *maze) setRooms(fileInput []string) error {
 // m.setRoom() process a room defintion line.
 // It accepts 3 inputs split by space, and no '-' is allowed in the line.
 // It also checks if there is repeat of room name or coordinates.
-func (m *maze) setRoom(rmValues string) (string, int, int, bool) {
+func (m *maze) setRoom(rmValues string) (string, bool) {
 	values := strings.Fields(rmValues)
 	if len(values) != 3 || strings.Contains(rmValues, "-") {
-		return "", 0, 0, false
+		return "", false
 	}
 	name := values[0]
 	if name[0] == 'L' || name[0] == '#' {
-		return "", 0, 0, false
+		return "", false
 	}
 	x, err := strconv.Atoi(values[1])
 	if err != nil {
-		return "", 0, 0, false
+		return "", false
 	}
 	y, err := strconv.Atoi(values[2])
 	if err != nil {
-		return "", 0, 0, false
+		return "", false
 	}
 	for key, room := range m.rooms {
 		if name == key || (room.x == x && room.y == y) {
-			return "", 0, 0, false
+			return "", false
 		}
 	}
-	return name, x, y, true
+	m.rooms[name] = &room{x: x, y: y}
+	return name, true
 }
 
 // m.setLinks() process the whole inputFile for valid link definition.s
