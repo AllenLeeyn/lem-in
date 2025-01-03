@@ -31,7 +31,7 @@ func main() {
 	m.getMoving()
 }
 
-// getInput() reads contents of .txt file
+// getInput() reads contents of .txt file. Ignore empty newlines and comments
 func getInput(filename string) ([]string, error) {
 	if !strings.HasSuffix(filename, ".txt") {
 		return nil, fmt.Errorf("ERROR: only .txt files are allowed")

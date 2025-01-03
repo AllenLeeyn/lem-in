@@ -48,6 +48,9 @@ This `lem-in` project is a digital version of an ant farm. The goals of the prog
 - Refactor getMoving(). need to make it more readable (Allen)
 - flowchart for program (Jedi)
 - color coding antsMovement for easier tracking
+- optimize solution finding
+    - group paths based on first room
+    - if number of groupings left while searching for a solution is not able to form a solution, decrease flow
 - visualization.
 
 #### example00
