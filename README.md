@@ -37,7 +37,7 @@ This `lem-in` project is a digital version of an ant farm. The goals of the prog
   - link to unknown rooms
   - room with invalid coordinates
   - a variety of invalid or poorly formatted input
-  - A room will never start with the letter _L_ or with _#_ and must have no spaces
+  - A room name will never start with the letter `L` or with symbol `#` and must have no spaces
   - two rooms can't have more than one tunnel connecting them
   - each room can contain only one ant at a time
 
