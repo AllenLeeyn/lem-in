@@ -29,6 +29,7 @@ func main() {
 	m.getAntsAssignment()
 	m.printMaze()
 	m.getMoving()
+	fmt.Print(m.movement)
 }
 
 // getInput() reads contents of .txt file. Ignore empty newlines and comments
