@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -13,6 +14,7 @@ type testMaze struct {
 	expectedPaths []testPathStruct
 	sol           *testSolution
 	expectedSeq   [][]string
+	expectedError bool
 }
 
 type testRoom struct {
@@ -80,7 +82,7 @@ func TestGetPaths(t *testing.T) {
 				{seq: []string{"0", "o", "n", "m"}, length: 5, antsAssigned: 0, antProcessing: 0, antsProcessed: 0},
 				{seq: []string{"0", "o", "n", "h", "A", "c", "k"}, length: 8, antsAssigned: 0, antProcessing: 0, antsProcessed: 0},
 			}},
-		/* {
+		{
 			name:     "example02",
 			filename: "examples/example02.txt",
 			start:    "0",
@@ -93,8 +95,9 @@ func TestGetPaths(t *testing.T) {
 			},
 			expectedPaths: []testPathStruct{
 				{seq: []string{"1", "2"}, length: 3, antsAssigned: 0, antProcessing: 0, antsProcessed: 0},
+				{seq: []string{}, length: 1, antsAssigned: 0, antProcessing: 0, antsProcessed: 0},
 			},
-		}, */
+		},
 		{
 			name:     "example03",
 			filename: "examples/example03.txt",
@@ -164,6 +167,101 @@ func TestGetPaths(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestGetPaths_Duplicates(t *testing.T) {
+	tests := []testMaze{
+		{
+			name:          "example00",
+			filename:      "examples/example00.txt",
+			expectedError: false,
+		},
+		{
+			name:          "example01",
+			filename:      "examples/example01.txt",
+			expectedError: false,
+		},
+		{
+			name:          "example02",
+			filename:      "examples/example02.txt",
+			expectedError: false,
+		},
+		{
+			name:          "example03",
+			filename:      "examples/example03.txt",
+			expectedError: false,
+		},
+		{
+			name:          "example04",
+			filename:      "examples/example04.txt",
+			expectedError: false,
+		},
+		{
+			name:          "example05",
+			filename:      "examples/example05.txt",
+			expectedError: false,
+		},
+		{
+			name:     "with duplicates",
+			filename: "",
+			start:    "start",
+			end:      "end",
+			rooms: map[string]*testRoom{
+				"start": {linkTo: []string{"A", "B"}},
+				"A":     {linkTo: []string{"C"}},
+				"B":     {linkTo: []string{"C"}},
+				"C":     {linkTo: []string{"end"}},
+				"end":   {linkTo: []string{}}},
+			expectedError: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fileInput, err := getInput(tt.filename)
+			if err == nil {
+				tt.expectedPaths = []testPathStruct{} // Reset paths
+				m := maze{rooms: make(map[string]*room), start: tt.start, end: tt.end}
+				err = m.setMaze(fileInput)
+				m.getPaths([]string{m.start})
+
+				seen := make(map[string]int)
+				hasDuplicates := false
+				if tt.filename != "" {
+					for _, path := range m.paths {
+						serialized := serializeSlice(path.seq)
+						if _, exists := seen[serialized]; exists {
+							hasDuplicates = true
+							break
+						}
+						seen[serialized]++
+					}
+
+					if hasDuplicates != tt.expectedError {
+						t.Errorf("Test %q failed: expected duplicates=%v, but got %v", tt.name, tt.expectedError, hasDuplicates)
+					}
+				} else {
+					for _, path := range tt.expectedPaths {
+						serialized := serializeSlice(path.seq)
+						if _, exists := seen[serialized]; exists {
+							hasDuplicates = true
+							break
+						}
+						seen[serialized]++
+					}
+
+					if hasDuplicates != tt.expectedError {
+						t.Errorf("Test %q failed: expected duplicates=%v, but got %v", tt.name, tt.expectedError, hasDuplicates)
+					}
+				}
+			}
+		})
+	}
+}
+
+// serializeSlice converts a slice of strings into a single string for map key usage.
+func serializeSlice(slice []string) string {
+	return strings.Join(slice, ",")
 }
 
 func TestGetSolution(t *testing.T) {
