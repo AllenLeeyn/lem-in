@@ -77,7 +77,6 @@ func (m *maze) setRooms(fileInput []string) error {
 	if startCount != 1 || endCount != 1 {
 		return fmt.Errorf("ERROR: invalid data format. Check quantity of start/end rooms")
 	}
-
 	return nil
 }
 

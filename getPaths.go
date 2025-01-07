@@ -1,5 +1,7 @@
 package main
 
+import "sort"
+
 // m.getPaths() get any path that connects the start to end.
 func (m *maze) getPaths(curPath []string) {
 	length := len(curPath)
@@ -25,4 +27,11 @@ func isVisited(curPath []string, nextRoom string) bool {
 		}
 	}
 	return false
+}
+
+// m.sortPaths() sorts m.paths in ascending order based on
+func (m *maze) sortPaths() {
+	sort.Slice(m.paths, func(i, j int) bool {
+		return m.paths[i].length < m.paths[i].length
+	})
 }

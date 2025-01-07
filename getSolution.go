@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math"
 	"sort"
 )
 
@@ -43,6 +44,17 @@ func (m *maze) searchSolution(flow, curID int, pathIDs []int) {
 			m.searchSolution(flow, curID+1, newPathID)
 		}
 	}
+}
+
+func (m *maze) getLengthLimit(pathIDs []int, curFlow int) int {
+	lenMaze := len(m.rooms)
+	length := 0
+	for _, id := range pathIDs {
+		length += m.paths[id].length
+	}
+	remainingLength := float64(lenMaze - length)
+	remainingPath := float64(curFlow - len(pathIDs))
+	return int(math.Ceil(remainingLength / remainingPath))
 }
 
 // m.isPathsClash() check if current path clashes with any paths

@@ -29,7 +29,7 @@ func (m *maze) getMoving() {
 	}
 }
 
-// m.getMove() c
+// m.getMove() records a move/exit if aID is not 0.
 func (m *maze) getMove(room string, aID, pID, exitQty int) int {
 	if aID != 0 {
 		color := colors[aID%12]
