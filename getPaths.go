@@ -32,6 +32,6 @@ func isVisited(curPath []string, nextRoom string) bool {
 // m.sortPaths() sorts m.paths in ascending order based on
 func (m *maze) sortPaths() {
 	sort.Slice(m.paths, func(i, j int) bool {
-		return m.paths[i].length < m.paths[i].length
+		return m.paths[i].length < m.paths[j].length
 	})
 }

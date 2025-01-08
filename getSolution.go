@@ -2,59 +2,83 @@ package main
 
 import (
 	"math"
-	"sort"
 )
 
 // m.getSolution() get the optimal flow base on number of links in start/end
 // and searchSolution based on the flow.
 func (m *maze) getSolution() {
-	flow := len(m.rooms[m.start].linkTo)
+	maxFlow := len(m.rooms[m.start].linkTo)
 	endLinks := len(m.rooms[m.end].linkTo)
-	if endLinks < flow {
-		flow = endLinks
+	if endLinks < maxFlow {
+		maxFlow = endLinks
 	}
-	for m.sol == nil && flow > 0 {
-		m.searchSolution(flow, 0, []int{})
-		flow--
+	m.sol = &solution{pathIDs: []int{0}, length: len(m.paths[0].seq)}
+	for curFlow := 1; curFlow <= maxFlow; curFlow++ {
+		m.searchSolution(curFlow, 0, []int{})
 	}
 	for _, id := range m.sol.pathIDs {
 		m.paths[id].seq = append(m.paths[id].seq, m.end)
 	}
-	m.sortSolution()
 }
 
-// m.searchSolution() goes through all possible combination of paths
-// to find the optimal solution (maximum flow, minimum length)
+// m.searchSolution() search for combinations of paths based on flow.
 func (m *maze) searchSolution(flow, curID int, pathIDs []int) {
 	for ; curID < len(m.paths); curID++ {
+		lengthLimit := m.getLengthLimit(pathIDs, flow)
+		if m.paths[curID].length-1 > lengthLimit {
+			return
+		}
 		if m.isPathsClash(curID, pathIDs) {
 			continue
 		}
-		newPathID := append([]int{}, pathIDs...)
-		newPathID = append(newPathID, curID)
-		if len(newPathID) == flow {
+		newPathIDs := append([]int{}, pathIDs...)
+		newPathIDs = append(newPathIDs, curID)
+		if len(newPathIDs) == flow {
 			length := 0
-			for _, path := range newPathID {
+			for _, path := range newPathIDs {
 				length += m.paths[path].length
 			}
-			if m.sol == nil || m.sol.length > length {
-				m.sol = &solution{pathIDs: newPathID, length: length}
+			estNumSteps := m.evalSolution(newPathIDs)
+			if estNumSteps != 0 && m.evalSolution(m.sol.pathIDs) > estNumSteps {
+				m.sol = &solution{pathIDs: newPathIDs, length: length}
 			}
+			return
 		} else {
-			m.searchSolution(flow, curID+1, newPathID)
+			m.searchSolution(flow, curID+1, newPathIDs)
 		}
 	}
 }
 
-func (m *maze) getLengthLimit(pathIDs []int, curFlow int) int {
+// m.getLengthLimit() calculates the average length per path
+// based on the number of rooms and the number of paths.
+// This is an estimate length to limit search.
+func (m *maze) getLengthLimit(pathIDs []int, flow int) int {
 	lenMaze := len(m.rooms)
 	length := 0
 	for _, id := range pathIDs {
-		length += m.paths[id].length
+		length += m.paths[id].length - 1
 	}
 	remainingLength := float64(lenMaze - length)
-	remainingPath := float64(curFlow - len(pathIDs))
+	remainingPath := float64(flow - len(pathIDs))
 	return int(math.Ceil(remainingLength / remainingPath))
+}
+
+// m.evalSolution() calculates an estimate number of turns.
+// This help us to compare slutions.
+func (m *maze) evalSolution(pathIDs []int) int {
+	pathsCnt := len(pathIDs)
+	longestPath := pathIDs[pathsCnt-1]
+	longestLength := m.paths[longestPath].length
+
+	diff := 0
+	for _, id := range pathIDs {
+		diff += longestLength - m.paths[id].length
+	}
+	if m.antQty-diff <= 0 {
+		return 0
+	}
+	antsPerPath := math.Ceil(float64(m.antQty-diff-pathsCnt) / float64(pathsCnt))
+	return int(antsPerPath) + longestLength
 }
 
 // m.isPathsClash() check if current path clashes with any paths
@@ -70,12 +94,4 @@ func (m *maze) isPathsClash(curID int, pathID []int) bool {
 		}
 	}
 	return false
-}
-
-// m.sortSolution() sorts m.sol.pathIDs in
-// a decreasing order based on path's length
-func (m *maze) sortSolution() {
-	sort.Slice(m.sol.pathIDs, func(i, j int) bool {
-		return m.paths[m.sol.pathIDs[i]].length < m.paths[m.sol.pathIDs[j]].length
-	})
 }
