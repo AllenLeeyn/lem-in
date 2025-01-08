@@ -20,7 +20,7 @@ type room struct {
 type pathStruct struct {
 	seq           []string
 	length        int
-	antsAssigned  int
+	antsSet  int
 	antProcessing int
 	antsProcessed int
 }

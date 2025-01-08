@@ -1,0 +1,77 @@
+18
+#This maze is constructed to have three solutions that completely
+#prevent each other:
+#1 route of 5 moves
+#2 routes of 6 moves each and
+#3 routes of 9 moves each
+# 
+#Solutions that use two routes are easy to miss when writing the program
+##
+#Ants, best solutions and number of routes taken:
+#1 ant, 5 turns, 1 route
+#4 ants, 7 turns, 2 routes
+#14 ants, 12 turns, 2 routes
+#15 ants, 13 turns, 3 routes
+#18 ants, 14 turns, 3 routes
+#
+##start
+start 9 0
+d0 18 0
+d1 18 3
+a2 0 5
+b2 6 5
+c2 12 5
+d2 18 5
+a3 0 7
+b3 6 7
+c3 12 7
+d3 18 7
+a4 0 9
+b4 6 9
+c4 12 9
+d4 18 9
+a5 0 11
+b5 6 11
+c5 12 11
+d5 18 11
+a6 0 13
+b6 6 13
+c6 12 13
+d6 18 13
+a7 0 15
+a8 0 17
+##end
+end 9 17
+#start room links
+start-a2
+start-b2
+start-c2
+#end room links
+b6-end
+c6-end
+d6-end
+#vertical links
+a2-a3
+a3-a4
+a4-a5
+a5-a6
+a6-a7
+a7-a8
+b2-b3
+b3-b4
+b4-b5
+b5-b6
+c2-c3
+c3-c4
+c4-c5
+c5-c6
+d0-d1
+d1-d2
+d2-d3
+d3-d4
+d4-d5
+d5-d6
+#oblique links
+a8-b6
+b5-c3
+c2-d0

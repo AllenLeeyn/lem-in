@@ -26,7 +26,7 @@ func main() {
 		checkErr(fmt.Errorf("ERROR: no paths found"))
 	}
 	m.getSolution()
-	m.getAntsAssignment()
+	m.setAntsToPaths()
 	m.printMaze()
 	m.getMoving()
 	fmt.Print(m.movement)
