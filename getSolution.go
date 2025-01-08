@@ -13,9 +13,8 @@ func (m *maze) getSolution() {
 		maxFlow = endLinks
 	}
 	m.sol = &solution{pathIDs: []int{0}, length: len(m.paths[0].seq)}
-	for curFlow := 1; curFlow <= maxFlow; curFlow++ {
-		m.searchSolution(curFlow, 0, []int{})
-	}
+	m.searchSolution(maxFlow, 0, []int{})
+
 	for _, id := range m.sol.pathIDs {
 		m.paths[id].seq = append(m.paths[id].seq, m.end)
 	}
@@ -24,8 +23,11 @@ func (m *maze) getSolution() {
 // m.searchSolution() search for combinations of paths based on flow.
 func (m *maze) searchSolution(flow, curID int, pathIDs []int) {
 	for ; curID < len(m.paths); curID++ {
+		if curID+(flow-len(pathIDs)) > len(m.paths) {
+			return
+		}
 		lengthLimit := m.getLengthLimit(pathIDs, flow)
-		if m.paths[curID].length-1 > lengthLimit {
+		if (m.paths[curID].length - 1) > lengthLimit {
 			return
 		}
 		if m.isPathsClash(curID, pathIDs) {
@@ -33,19 +35,15 @@ func (m *maze) searchSolution(flow, curID int, pathIDs []int) {
 		}
 		newPathIDs := append([]int{}, pathIDs...)
 		newPathIDs = append(newPathIDs, curID)
-		if len(newPathIDs) == flow {
-			length := 0
-			for _, path := range newPathIDs {
-				length += m.paths[path].length
-			}
-			estNumSteps := m.evalSolution(newPathIDs)
-			if estNumSteps != 0 && m.evalSolution(m.sol.pathIDs) > estNumSteps {
-				m.sol = &solution{pathIDs: newPathIDs, length: length}
-			}
-			return
-		} else {
-			m.searchSolution(flow, curID+1, newPathIDs)
+		length := 0
+		for _, path := range newPathIDs {
+			length += m.paths[path].length
 		}
+		estNumSteps := m.evalSolution(newPathIDs)
+		if estNumSteps != 0 && m.evalSolution(m.sol.pathIDs) > estNumSteps {
+			m.sol = &solution{pathIDs: newPathIDs, length: length}
+		}
+		m.searchSolution(flow, curID+1, newPathIDs)
 	}
 }
 
