@@ -65,30 +65,28 @@ Lx-y Lz-w Lr-o ...
 Here is a flowchart visually describing this `lem-in` application:
 
 ```mermaid
-flowchart LR
+flowchart TD
 
-main["take filename/os.Args[1]"] ==> getInput ==> setMaze ==> getPaths ==> getSolution ==> getAntsAssignment ==> printMaze ==> getMoving ==> printMovement[print final movement]
+main["take filename/os.Args[1]"] ==> getInput ==> setMaze ==> getPaths ==> getSolution ==> setAntsToPaths ==> getMoving ==> printMovement[print input + final movement]
 
 %% main.go > func getInput
   subgraph getInput[func getInput]
+    direction LR
       chkExt([check file ext]) --> open([open file]) --> scan([scan file contents]) --> sanitize([sanitize input]) --> fileIn([create slice of strings])
   end
 
 %% setMaze.go
 subgraph setMaze[func setMaze]
-direction LR
+direction TB
 setAntQty ==> setRooms ==> setLinks
 
-    subgraph setAntQty[func setAntQty]
-    chkAnt([validate if antQty is int])
+    subgraph setAntQty[func setAntQty: validate if antQty is int]
     end
 
     subgraph setRooms[func setRooms]
     chkStartEnd([check ##start and ##end]) --> sp([process only lines that contain space]) --> setRoom
 
-        subgraph setRoom[func setRoom]
-        direction TB
-        splitS([split line using space as separator]) --> chkValues([validate if line has 3 values, doesn't contain a dash '-'])
+        subgraph setRoom[func setRoom: split line using space as separator, validate if line has 3 values and doesn't contain a dash '-']
         end
 
     end
@@ -96,8 +94,7 @@ setAntQty ==> setRooms ==> setLinks
     subgraph setLinks[func setLinks]
     dash([process only lines that contain a dash: '-']) --> splitL([split line and save link0, link1]) --> isValidLink --> adjL([populate adjacency list m.rooms.linkTo: list of all rooms and all its links, considering both link0 and link1])
 
-        subgraph isValidLink[func isValidLink]
-        chkRmExists([check room exists]) --> chkLinkToItself([check that room doesn't link to itself]) --> chkSameLink([link can't be more than 1])
+        subgraph isValidLink[func isValidLink: check that room exists, room doesn't link to itself, link can't be more than 1]
         end
 
     end
@@ -106,41 +103,47 @@ end
 
 %% getPaths.go
 subgraph getPaths[func getPaths]
-chkAllLinks([check all links to curRoom]) --> isVisited --> recursivGetPath([find next room by calling getPaths recursively]) --> pathStruct([populate pathStruct once end room is reached])
+direction LR
+chkAllLinks([check all links to curRoom]) --> isVisited --> recursivGetPath([find next room by calling getPaths recursively]) --> pathStruct([populate pathStruct once end room is reached]) --> sortPaths
 
     subgraph isVisited[func !isVisited: check room has not been visited in curPath]
+    end
+
+    subgraph sortPaths[func sortPaths: sorts all found paths from shortest to longest]
     end
 
 end
 
 %% getSolution.go
 subgraph getSolution[func getSolution]
-getFlow([get max flow]) --> searchSolution --> appendEnd([append end room to path found]) --> sortSolution
+direction LR
+getFlow([get max flow]) --> searchSolution --> appendEnd([append end room to path found])
 
     subgraph searchSolution[func searchSolution]
     direction TB
-    isPathsClash --> recursivSearchSol([recursively search for paths until max flow is reached]) --> solStruct([populate solution struct])
+    getLengthLimit --> isPathsClash --> getStepEstimate --> recursivSearchSol([recursively search for paths until max flow is reached]) --> solStruct([populate solution struct])
     
-        subgraph isPathsClash[func isPathsClash: check if room is at the same position in any path]
+        subgraph getLengthLimit[func getLengthLimit: calculate average length per path to limit search]
         end
 
-    end
+        subgraph isPathsClash[func isPathsClash: check if current path clashes with any paths]
+        end
 
-    subgraph sortSolution[func sortSolution: shortest to longest path length]
+        subgraph getStepEstimate[func getStepEstimate: calculate estimated number of turns]
+        end
+
     end
 
 end
 
 %% getMoving.go
-subgraph getAntsAssignment[func getAntsAssignment]
+subgraph setAntsToPaths[func setAntsToPaths]
+    direction LR
 iterateSolPath([iterate thru all path solutions]) --> assignAnts([distribute ants based on path length])
 end
 
-subgraph printMaze[func printMaze]
-printInput([print sanitized input + empty line])
-end
-
 subgraph getMoving[func getMoving]
+    direction LR
 iterateSolPathRms([take each ant thru each room of each path solution]) --> getMove
 
     subgraph getMove["func getMove: print each ant movement (ant-room) and set colors"]
