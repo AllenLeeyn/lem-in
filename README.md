@@ -269,6 +269,6 @@ end
 
 ## Members
 
-* Inka Säävuori 👑
+* [Inka Säävuori](https://github.com/Inkasaa) 👑
 * [Jedi Reston](https://github.com/jeeeeedi) 🤓
 * [Yuanneng Lee (Allen)](https://github.com/AllenLeeyn) 🤖
