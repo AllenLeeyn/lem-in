@@ -111,19 +111,23 @@ func TestGetSolution(t *testing.T) {
 			}
 
 			m.getPaths([]string{m.start})
+			if len(m.paths) == 0 {
+				checkErr(fmt.Errorf("ERROR: no paths found"))
+			}
+			m.sortPaths()
 			m.getSolution()
 
-			if m.sol == nil {
+			if m.optimalPaths == nil {
 				t.Fatalf("Expected solution, but got nil")
 			}
 
-			if len(m.sol.pathIDs) != len(tt.expectedSeq) {
-				t.Errorf("Expected pathIDs length %d, but got %d", len(tt.expectedSeq), len(m.sol.pathIDs))
+			if len(m.optimalPaths) != len(tt.expectedSeq) {
+				t.Errorf("Expected pathIDs length %d, but got %d", len(tt.expectedSeq), len(m.optimalPaths))
 			}
 
-			for i, id := range m.sol.pathIDs {
-				if !compareSlices(m.paths[id].seq, tt.expectedSeq[i]) {
-					t.Errorf("Expected path sequence at index %d to be %v, but got %v", i, tt.expectedSeq[i], m.paths[id].seq)
+			for i, id := range m.optimalPaths {
+				if !compareSlices(m.paths[id].path, tt.expectedSeq[i]) {
+					t.Errorf("Expected path sequence at index %d to be %v, but got %v", i, tt.expectedSeq[i], m.paths[id].path)
 				}
 			}
 		})
@@ -224,12 +228,12 @@ func TestGetSolution_Duplicates(t *testing.T) {
 				hasDuplicates := false
 				duplicateDetails := []string{}
 
-				for i, id := range m.sol.pathIDs {
-					serialized := serializeSlice(m.paths[id].seq)
+				for i, id := range m.optimalPaths {
+					serialized := serializeSlice(m.paths[id].path)
 					if index, exists := seen[serialized]; exists {
 						hasDuplicates = true
 						duplicateDetails = append(duplicateDetails,
-							fmt.Sprintf("Repeated seqs found at index %d %v and index %d %v", index, m.paths[index].seq, i, m.paths[id].seq))
+							fmt.Sprintf("Repeated seqs found at index %d %v and index %d %v", index, m.paths[index].path, i, m.paths[id].path))
 					}
 					seen[serialized] = i
 				}

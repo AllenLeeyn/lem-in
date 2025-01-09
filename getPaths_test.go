@@ -154,13 +154,13 @@ func TestGetPaths(t *testing.T) {
 					t.Errorf("Expected paths length %d, but got %d", len(tt.expectedPaths), len(m.paths))
 				} else {
 					for i := range m.paths {
-						if len(m.paths[i].seq) != len(tt.expectedPaths[i].seq) || m.paths[i].length != tt.expectedPaths[i].length {
+						if len(m.paths[i].path) != len(tt.expectedPaths[i].seq) || m.paths[i].length != tt.expectedPaths[i].length {
 							t.Errorf("Expected path at index %d to be %v, but got %v", i, tt.expectedPaths[i], m.paths[i])
 							continue
 						}
-						for j := range m.paths[i].seq {
-							if m.paths[i].seq[j] != tt.expectedPaths[i].seq[j] {
-								t.Errorf("Expected path at index %d, element %d to be %v, but got %v", i, j, tt.expectedPaths[i].seq[j], m.paths[i].seq[j])
+						for j := range m.paths[i].path {
+							if m.paths[i].path[j] != tt.expectedPaths[i].seq[j] {
+								t.Errorf("Expected path at index %d, element %d to be %v, but got %v", i, j, tt.expectedPaths[i].seq[j], m.paths[i].path[j])
 							}
 						}
 					}
@@ -246,11 +246,11 @@ func TestGetPaths_Duplicates(t *testing.T) {
 				duplicateDetails := []string{}
 
 				for i, path := range m.paths {
-					serialized := serializeSlice(path.seq)
+					serialized := serializeSlice(path.path)
 					if index, exists := seen[serialized]; exists {
 						hasDuplicates = true
 						duplicateDetails = append(duplicateDetails,
-							fmt.Sprintf("Repeated paths found at index %d %v and index %d %v", index, m.paths[index].seq, i, path.seq))
+							fmt.Sprintf("Repeated paths found at index %d %v and index %d %v", index, m.paths[index].path, i, path.path))
 					}
 					seen[serialized] = i
 				}

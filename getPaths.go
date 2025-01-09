@@ -8,9 +8,9 @@ func (m *maze) getPaths(curPath []string) {
 	curRoom := curPath[length-1]
 	newPath := append([]string{}, curPath...)
 	for _, nextRoom := range m.rooms[curRoom].linkTo { //loop through the links from the current room
-		if nextRoom == m.end {  //current path is finshed
+		if nextRoom == m.end { //current path is finshed
 			m.paths = append(m.paths,
-				pathStruct{seq: newPath[1:], length: length})
+				pathStruct{path: newPath[1:], length: length})
 			continue
 		}
 		if !isVisited(newPath, nextRoom) {

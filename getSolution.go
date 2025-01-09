@@ -4,7 +4,7 @@ import (
 	"math"
 )
 
-// m.getSolution() get the optimal flow base on number of links in start/end
+// m.getSolution() get the optimal flow based on number of links in start/end
 // and searchSolution based on the flow.
 func (m *maze) getSolution() {
 	maxFlow := len(m.rooms[m.start].linkTo)
@@ -12,11 +12,11 @@ func (m *maze) getSolution() {
 	if endLinks < maxFlow {
 		maxFlow = endLinks
 	}
-	m.sol = &solution{pathIDs: []int{0}, length: len(m.paths[0].seq)}
+	m.optimalPaths = []int{0}
 	m.searchSolution(maxFlow, 0, []int{})
 
-	for _, id := range m.sol.pathIDs {
-		m.paths[id].seq = append(m.paths[id].seq, m.end)
+	for _, id := range m.optimalPaths {
+		m.paths[id].path = append(m.paths[id].path, m.end)
 	}
 }
 
@@ -36,9 +36,9 @@ func (m *maze) searchSolution(flow, curID int, pathIDs []int) {
 		for _, path := range newPathIDs {
 			length += m.paths[path].length
 		}
-		estNumSteps := m.stepEstimate(newPathIDs)
-		if estNumSteps != 0 && estNumSteps < m.stepEstimate(m.sol.pathIDs) { //if newPathIDs estimate steps is smaller than the current best solution
-			m.sol = &solution{pathIDs: newPathIDs, length: length} // assign newPathIDs to the current best
+		estNumSteps := m.getStepEstimate(newPathIDs)
+		if estNumSteps != 0 && estNumSteps < m.getStepEstimate(m.optimalPaths) { //if newPathIDs estimate steps is smaller than the current best solution
+			m.optimalPaths = newPathIDs // assign newPathIDs to the current best
 		}
 		m.searchSolution(flow, curID+1, newPathIDs)
 	}
@@ -48,22 +48,21 @@ func (m *maze) searchSolution(flow, curID int, pathIDs []int) {
 // based on the number of rooms and the number of paths.
 // This is an estimate length to limit search.
 func (m *maze) getLengthLimit(pathIDs []int, flow int) int {
-	lenMaze := len(m.rooms) // number of all rooms
+	numberOfRooms := len(m.rooms) // number of all rooms
 	length := 0
 	for _, id := range pathIDs {
 		length += m.paths[id].length - 1 // number of rooms in current solution
 	}
-	remainingLength := float64(lenMaze - length)
+	remainingLength := float64(numberOfRooms - length)
 	remainingPath := float64(flow - len(pathIDs))          // number of paths we are looking - number of paths collected already
 	return int(math.Ceil(remainingLength / remainingPath)) // we can eliminate all paths that are longer than this
 }
 
 // m.stepEstimate() calculates an estimate number of turns.
 // This help us to compare slutions.
-func (m *maze) stepEstimate(pathIDs []int) int {
+func (m *maze) getStepEstimate(pathIDs []int) int {
 	pathsCnt := len(pathIDs)
-	longestPath := pathIDs[pathsCnt-1]
-	longestLength := m.paths[longestPath].length
+	longestLength := m.paths[pathIDs[pathsCnt-1]].length
 
 	diff := 0
 	for _, id := range pathIDs {
@@ -78,10 +77,10 @@ func (m *maze) stepEstimate(pathIDs []int) int {
 
 // m.isPathsClash() check if current path clashes with any paths
 // in the current potential solution
-func (m *maze) isPathsClash(curID int, pathID []int) bool {
-	for _, id := range pathID {
-		for _, room := range m.paths[id].seq {
-			for _, clash := range m.paths[curID].seq {
+func (m *maze) isPathsClash(curID int, pathIDs []int) bool {
+	for _, id := range pathIDs {
+		for _, room := range m.paths[id].path {
+			for _, clash := range m.paths[curID].path {
 				if room == clash {
 					return true
 				}

@@ -21,10 +21,11 @@ func main() {
 	checkErr(err)
 
 	m.getPaths([]string{m.start})
-	m.sortPaths()
 	if len(m.paths) == 0 {
 		checkErr(fmt.Errorf("ERROR: no paths found"))
 	}
+	m.sortPaths()
+
 	m.getSolution()
 	m.setAntsToPaths()
 	m.getMoving()

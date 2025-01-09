@@ -1,14 +1,14 @@
 package main
 
 type maze struct {
-	antQty     int
-	start      string
-	end        string
-	rooms      map[string]*room
-	paths      []pathStruct
-	sol        *solution
-	inputLines string // sanitize lines of input
-	movement   string
+	antQty       int
+	start        string
+	end          string
+	rooms        map[string]*room
+	paths        []pathStruct
+	optimalPaths []int
+	inputLines   string // sanitize lines of input
+	movement     string
 }
 
 type room struct {
@@ -18,16 +18,11 @@ type room struct {
 }
 
 type pathStruct struct {
-	seq           []string
+	path          []string
 	length        int
 	antsSet       int
 	antProcessing int
 	antsProcessed int
-}
-
-type solution struct {
-	pathIDs []int
-	length  int
 }
 
 const resetColor = "\033[00m"

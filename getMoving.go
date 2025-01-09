@@ -5,14 +5,15 @@ import "fmt"
 // m.getMoving() moves ants along each path
 func (m *maze) getMoving() {
 	nextAntID, prevAnt := 1, 0
+	antsExited, turns := 0, 0
 
-	for antsExited, turns := 0, 0; antsExited < m.antQty; turns++ {
+	for ; antsExited < m.antQty; turns++ {
 		m.movement += fmt.Sprintf("Turn %03d:", turns+1)
-		for _, pathID := range m.sol.pathIDs {
+		for _, pathID := range m.optimalPaths {
 			if m.paths[pathID].antsProcessed == m.paths[pathID].antsSet {
 				continue
 			}
-			for i, room := range m.paths[pathID].seq {
+			for i, room := range m.paths[pathID].path {
 				if i == 0 && m.paths[pathID].antProcessing < m.paths[pathID].antsSet { //if it is the first room, and there is still ants left to process
 					m.rooms[room].antID, prevAnt = nextAntID, m.rooms[room].antID //
 					m.paths[pathID].antProcessing++
@@ -27,30 +28,31 @@ func (m *maze) getMoving() {
 		}
 		m.movement += "\n"
 	}
+	//m.movement += fmt.Sprintf("\nNumber of ants exited: %d", antsExited) + "\n"
 }
 
 // m.getMove() records a move/exit if aID is not 0.
-func (m *maze) getMove(room string, antID, pathID, exitQty int) int {
+func (m *maze) getMove(room string, antID, pathID, antsExited int) int {
 	if antID != 0 {
 		color := colors[antID%12]
 		if room == m.end {
 			color = "\033[7m" + color
 			m.paths[pathID].antsProcessed++
-			exitQty++
+			antsExited++
 		}
 		m.movement += fmt.Sprintf(" %sL%d-%s%s", color, antID, room, resetColor)
 	}
-	return exitQty
+	return antsExited
 }
 
 // m.getAntAssignment() assigns ants to each path base on path's length
 func (m *maze) setAntsToPaths() {
 
 	unSetAnts := m.antQty
-	numberOfPaths := len(m.sol.pathIDs)
+	numberOfPaths := len(m.optimalPaths)
 
 	for unSetAnts > 0 {
-		for i, id := range m.sol.pathIDs { // loop thru all optimal paths
+		for i, id := range m.optimalPaths { // loop thru all optimal paths
 
 			// Calculate current path steps considering length and ants already set
 			currentPathSteps := m.paths[id].length + m.paths[id].antsSet
@@ -58,7 +60,7 @@ func (m *maze) setAntsToPaths() {
 
 			// Check next path if it's not the last one
 			if i < numberOfPaths-1 {
-				nextID := m.sol.pathIDs[i+1]
+				nextID := m.optimalPaths[i+1]
 				nextPathSteps = m.paths[nextID].length + m.paths[nextID].antsSet
 
 				// If the current path steps are less than the next path, assign an ant to the current path
