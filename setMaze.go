@@ -6,14 +6,6 @@ import (
 	"strings"
 )
 
-// m.printMaze() prints the input given
-func (m *maze) printMaze() {
-	for _, line := range m.result {
-		fmt.Println(line)
-	}
-	fmt.Println()
-}
-
 // m.setMaze() process the fileInput set the maze definition/parameters
 func (m *maze) setMaze(fileInput []string) error {
 	if err := m.setAntQty(fileInput[0]); err != nil {
@@ -38,7 +30,8 @@ func (m *maze) setAntQty(fileInput string) error {
 		return fmt.Errorf("ERROR: %s is not a valid ant quantity",
 			fileInput)
 	}
-	m.antQty, m.result = antQty, append(m.result, fileInput)
+	m.antQty = antQty
+	m.inputLines += fileInput + "\n"
 	return nil
 }
 
@@ -50,7 +43,7 @@ func (m *maze) setRooms(fileInput []string) error {
 
 	for i := 0; i < len(fileInput); i++ {
 		if fileInput[i] == "##start" || fileInput[i] == "##end" {
-			m.result = append(m.result, fileInput[i])
+			m.inputLines += fileInput[i] + "\n"
 			found = fileInput[i]
 			if i+1 < len(fileInput) {
 				i++
@@ -72,7 +65,7 @@ func (m *maze) setRooms(fileInput []string) error {
 			m.end, found = name, ""
 			endCount++
 		}
-		m.result = append(m.result, fileInput[i])
+		m.inputLines += fileInput[i] + "\n"
 	}
 	if startCount != 1 || endCount != 1 {
 		return fmt.Errorf("ERROR: invalid data format. Check quantity of start/end rooms")
@@ -121,7 +114,7 @@ func (m *maze) setLinks(fileInput []string) error {
 		}
 		m.rooms[link[0]].linkTo = append(m.rooms[link[0]].linkTo, link[1])
 		m.rooms[link[1]].linkTo = append(m.rooms[link[1]].linkTo, link[0])
-		m.result = append(m.result, fileInput[i])
+		m.inputLines += fileInput[i] + "\n"
 	}
 	return nil
 }

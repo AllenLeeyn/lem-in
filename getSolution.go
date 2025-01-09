@@ -23,9 +23,6 @@ func (m *maze) getSolution() {
 // m.searchSolution() search for combinations of paths based on flow.
 func (m *maze) searchSolution(flow, curID int, pathIDs []int) {
 	for ; curID < len(m.paths); curID++ {
-		if curID+(flow-len(pathIDs)) > len(m.paths) {
-			return
-		}
 		lengthLimit := m.getLengthLimit(pathIDs, flow)
 		if (m.paths[curID].length - 1) > lengthLimit {
 			return
@@ -39,9 +36,9 @@ func (m *maze) searchSolution(flow, curID int, pathIDs []int) {
 		for _, path := range newPathIDs {
 			length += m.paths[path].length
 		}
-		estNumSteps := m.evalSolution(newPathIDs)
-		if estNumSteps != 0 && m.evalSolution(m.sol.pathIDs) > estNumSteps {
-			m.sol = &solution{pathIDs: newPathIDs, length: length}
+		estNumSteps := m.stepEstimate(newPathIDs)
+		if estNumSteps != 0 && estNumSteps < m.stepEstimate(m.sol.pathIDs) { //if newPathIDs estimate steps is smaller than the current best solution
+			m.sol = &solution{pathIDs: newPathIDs, length: length} // assign newPathIDs to the current best
 		}
 		m.searchSolution(flow, curID+1, newPathIDs)
 	}
@@ -51,19 +48,19 @@ func (m *maze) searchSolution(flow, curID int, pathIDs []int) {
 // based on the number of rooms and the number of paths.
 // This is an estimate length to limit search.
 func (m *maze) getLengthLimit(pathIDs []int, flow int) int {
-	lenMaze := len(m.rooms)
+	lenMaze := len(m.rooms) // number of all rooms
 	length := 0
 	for _, id := range pathIDs {
-		length += m.paths[id].length - 1
+		length += m.paths[id].length - 1 // number of rooms in current solution
 	}
 	remainingLength := float64(lenMaze - length)
-	remainingPath := float64(flow - len(pathIDs))
-	return int(math.Ceil(remainingLength / remainingPath))
+	remainingPath := float64(flow - len(pathIDs))          // number of paths we are looking - number of paths collected already
+	return int(math.Ceil(remainingLength / remainingPath)) // we can eliminate all paths that are longer than this
 }
 
-// m.evalSolution() calculates an estimate number of turns.
+// m.stepEstimate() calculates an estimate number of turns.
 // This help us to compare slutions.
-func (m *maze) evalSolution(pathIDs []int) int {
+func (m *maze) stepEstimate(pathIDs []int) int {
 	pathsCnt := len(pathIDs)
 	longestPath := pathIDs[pathsCnt-1]
 	longestLength := m.paths[longestPath].length

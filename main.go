@@ -27,8 +27,8 @@ func main() {
 	}
 	m.getSolution()
 	m.setAntsToPaths()
-	m.printMaze()
 	m.getMoving()
+	fmt.Println(m.inputLines)
 	fmt.Print(m.movement)
 }
 

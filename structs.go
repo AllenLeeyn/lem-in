@@ -1,14 +1,14 @@
 package main
 
 type maze struct {
-	antQty   int
-	start    string
-	end      string
-	rooms    map[string]*room
-	paths    []pathStruct
-	sol      *solution
-	result   []string
-	movement string
+	antQty     int
+	start      string
+	end        string
+	rooms      map[string]*room
+	paths      []pathStruct
+	sol        *solution
+	inputLines string // sanitize lines of input
+	movement   string
 }
 
 type room struct {
@@ -20,7 +20,7 @@ type room struct {
 type pathStruct struct {
 	seq           []string
 	length        int
-	antsSet  int
+	antsSet       int
 	antProcessing int
 	antsProcessed int
 }
