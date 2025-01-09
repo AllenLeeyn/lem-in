@@ -4,7 +4,7 @@ import (
 	"math"
 )
 
-// m.getSolution() get the optimal flow based on number of links in start/end
+// m.getSolution() gets the optimal flow based on number of links to start/end
 // and searchSolution based on the flow.
 func (m *maze) getSolution() {
 	maxFlow := len(m.rooms[m.start].linkTo)
@@ -46,7 +46,7 @@ func (m *maze) searchSolution(flow, curID int, pathIDs []int) {
 
 // m.getLengthLimit() calculates the average length per path
 // based on the number of rooms and the number of paths.
-// This is an estimate length to limit search.
+// This is an estimated length to limit search.
 func (m *maze) getLengthLimit(pathIDs []int, flow int) int {
 	numberOfRooms := len(m.rooms) // number of all rooms
 	length := 0
@@ -54,12 +54,15 @@ func (m *maze) getLengthLimit(pathIDs []int, flow int) int {
 		length += m.paths[id].length - 1 // number of rooms in current solution
 	}
 	remainingLength := float64(numberOfRooms - length)
-	remainingPath := float64(flow - len(pathIDs))          // number of paths we are looking - number of paths collected already
+	remainingPath := float64(flow - len(pathIDs)) // number of paths we are looking - number of paths collected already
+	if remainingPath == float64(0) {
+		remainingPath = 1
+	}
 	return int(math.Ceil(remainingLength / remainingPath)) // we can eliminate all paths that are longer than this
 }
 
-// m.stepEstimate() calculates an estimate number of turns.
-// This help us to compare slutions.
+// m.stepEstimate() calculates an estimated number of turns.
+// This helps us compare solutions.
 func (m *maze) getStepEstimate(pathIDs []int) int {
 	pathsCnt := len(pathIDs)
 	longestLength := m.paths[pathIDs[pathsCnt-1]].length
@@ -75,7 +78,7 @@ func (m *maze) getStepEstimate(pathIDs []int) int {
 	return int(antsPerPath) + longestLength
 }
 
-// m.isPathsClash() check if current path clashes with any paths
+// m.isPathsClash() checks if current path clashes with any paths
 // in the current potential solution
 func (m *maze) isPathsClash(curID int, pathIDs []int) bool {
 	for _, id := range pathIDs {
